@@ -13,7 +13,7 @@ public class PageModel implements Serializable {
     // 当前页
     private Integer pagenumber = 1;
     // 当前页面条数
-    private Integer pagesize = 20;
+    private Integer pagesize = 10;
     // 排序条件
     private Sort sort;
 

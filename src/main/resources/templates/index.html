@@ -12,21 +12,23 @@
 <div class="card text-center">
     <div class="card-header text-white bg-primary text-left">查询条件</div>
     <div class="card-body">
+        <form action="/querybyvo" method="get">
         <div class="row">
             <div class="col-md-6">
                 <label class="col-md-2">IP</label>
-                <input class="col-md-4" type="text" placeholder="IP" id="ip" name="ip">
+                <input class="col-md-4" th:value="${ip}" type="text" placeholder="IP" id="ip" name="ip" >
             </div>
             <div class="col-md-6">
                 <label class="col-md-2">域名</label>
-                <input class="col-md-4" type="text" placeholder="DOMIN" id="domin" name="domin">
+                <input class="col-md-4" th:value="${domin}" type="text" placeholder="DOMIN" id="domin" name="domin">
             </div>
         </div>
         <br/>
         <div class="btn-group" role="group" aria-label="按钮组">
-            <button type="submit" class="btn btn-primary">清空</button>
-            <button type="button" class="btn btn-light">查询</button>
+            <button type="button" class="btn btn-light" id="clear">清空</button>
+            <button type="submit" class="btn btn-primary" id="find" onclick="insertVal()">查询</button>
         </div>
+        </form>
     </div>
 </div>
 <br/>
@@ -42,7 +44,7 @@
             <th scope="col">域名</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id = "tablebody">
         <tr th:if="${#lists.isEmpty(list)}" ><td colspan="6">暂无数据</td></tr>
         <tr th:each="list : ${list}">
             <td th:text=${listStat.index+1}></td>
@@ -56,6 +58,8 @@
     </table>
 <input type="hidden" th:value="${page}" id="pageNum"/>
 <input type="hidden" th:value="${count}" id="count"/>
+<input type="hidden" th:value="${ip}" id="ipVal"/>
+<input type="hidden" th:value="${count}" id="countVal"/>
 <div id="myPage"></div>
 
 
@@ -67,8 +71,9 @@
 <script type="text/javascript">
     var pageNum=$("#pageNum").val();
     var count=$("#count").val();
-    var ip = "";
-    var domin="";
+    var ip = $("#ipVal").val();
+    var domin=$("#countVal").val();
+
 $("#myPage").sPage({
 
 page:pageNum,//当前页码，必填
@@ -90,12 +95,23 @@ backFun:function(page){
             domin:domin,
             pageNumber: page,
         },
-        dataType: "json",
         success: function (result) {
-            alert(result);
+            var html = "";
+            for(var i = 0,len = result.length; i < len; i++){
+                var tem = i+1;
+                html+="<tr><td>"+tem+"</td><td>"+result[i].startTimestampt+"</td><td>"+result[i].endTimestampt+"</td><td>"+result[i].times+"</td><td>"+result[i].ip+"</td><td>"+result[i].domin+"</td></tr>";
+            }
+            console.log(html);
+            $("#tablebody").html(html);
         }
     })
 }
+});
+
+
+$("#clear").click(function () {
+   $("#ip").val("");
+    $("#domin").val("");
 });
 </script>
 </body>

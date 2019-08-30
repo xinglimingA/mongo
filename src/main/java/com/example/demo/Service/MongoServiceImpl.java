@@ -11,10 +11,12 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by XingLM on 2019/8/30.
@@ -31,11 +33,7 @@ public class MongoServiceImpl implements MongoService {
             page = 1;
         }
 
-        History history = new History();
-        history.setIp(queryVo.getIp());
-        history.setDomin(queryVo.getDomin());
-
-        Sort sort = new Sort(Sort.Direction.DESC,"id");
+        Sort sort = new Sort(Sort.Direction.DESC,"times");
 
         PageModel pageModel = new PageModel();
         pageModel.setSort(sort);
@@ -44,12 +42,18 @@ public class MongoServiceImpl implements MongoService {
         SpringbootPageable pageable = new SpringbootPageable();
         pageable.setPage(pageModel);
 
-        ExampleMatcher matcher = ExampleMatcher.matching()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
+        Page<History> pageList = null;
 
-        Example<History> example = Example.of(history,matcher);
-
-        Page<History> pageList = mongoDao.findAll(example,pageable);
+        if(StringUtils.isEmpty(queryVo.getDomin())&&StringUtils.isEmpty(queryVo.getIp())){
+            pageList = mongoDao.findAll(pageable);
+        }else if(!StringUtils.isEmpty(queryVo.getDomin())&&StringUtils.isEmpty(queryVo.getIp())){
+            pageList = mongoDao.findByDomin(queryVo.getDomin(),pageable);
+        }else if(StringUtils.isEmpty(queryVo.getDomin())&&!StringUtils.isEmpty(queryVo.getIp())){
+            pageList = mongoDao.findByIp(queryVo.getIp(),pageable);
+        }else{
+            String id = queryVo.getIp()+"_"+queryVo.getDomin();
+            pageList = mongoDao.findById(id,pageable);
+        }
 
         return pageList;
 
@@ -59,14 +63,25 @@ public class MongoServiceImpl implements MongoService {
 
     public Long countByQuery(QueryVo queryVo){
 
-        History history = new History();
-        history.setIp(queryVo.getIp());
-        history.setDomin(queryVo.getDomin());
-
-        ExampleMatcher matcher = ExampleMatcher.matching()
-                .withStringMatcher(ExampleMatcher.StringMatcher.EXACT);
-
-        Example<History> example = Example.of(history,matcher);
-        return mongoDao.count(example);
+        Long count = 0L;
+        List<History> list = null;
+        if(StringUtils.isEmpty(queryVo.getDomin())&&StringUtils.isEmpty(queryVo.getIp())){
+            count = mongoDao.count();
+        }else if(!StringUtils.isEmpty(queryVo.getDomin())&&StringUtils.isEmpty(queryVo.getIp())){
+            list = mongoDao.findByDomin(queryVo.getDomin());
+            count = Long.valueOf(list.size());
+        }else if(StringUtils.isEmpty(queryVo.getDomin())&&!StringUtils.isEmpty(queryVo.getIp())){
+            list = mongoDao.findByIp(queryVo.getIp());
+            count = Long.valueOf(list.size());
+        }else{
+            String id = queryVo.getIp()+"_"+queryVo.getDomin();
+            Optional<History> optional = mongoDao.findById(id);
+            if(optional.get()!=null){
+                count = 1L;
+            }else{
+                count = 0L;
+            }
+        }
+        return count;
     }
 }

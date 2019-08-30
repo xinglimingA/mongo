@@ -1,10 +1,13 @@
 package com.example.demo.Domain;
 
+import org.springframework.data.annotation.Id;
+
 /**
  * Created by XingLM on 2019/8/30.
  */
-public class Entity{
+public class History {
 
+    @Id
     private Long id;
 
     private String startTimestampt;
@@ -15,7 +18,7 @@ public class Entity{
 
     private String ip;
 
-    private String domain;
+    private String domin;
 
     public Long getId() {
         return id;
@@ -57,11 +60,11 @@ public class Entity{
         this.ip = ip;
     }
 
-    public String getDomain() {
-        return domain;
+    public String getDomin() {
+        return domin;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setDomin(String domin) {
+        this.domin = domin;
     }
 }
